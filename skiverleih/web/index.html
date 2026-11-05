@@ -1,0 +1,233 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Ski-Verleih</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="kopf">
+  <a class="logo" href="#dashboard">⛷ Ski-Verleih</a>
+  <button class="menu-knopf" aria-label="Menü" onclick="document.body.classList.toggle('menu-offen')">☰</button>
+  <nav>
+    <a href="#dashboard" data-nav="dashboard">Dashboard</a>
+    <a href="#ski" data-nav="ski">Ski-Verwaltung</a>
+    <a href="#personen" data-nav="personen">Personen</a>
+    <a href="#ausleihen" data-nav="ausleihen">Ausleihen</a>
+    <a href="#preise" data-nav="preise">Preise</a>
+  </nav>
+</header>
+
+<main>
+  <!-- Dashboard (A-11 … A-14) -->
+  <section data-page="dashboard" class="karte">
+    <h1>Dashboard</h1>
+    <div class="kacheln">
+      <div class="kachel k-lila"><span>Verfügbare Ski</span><b id="k-verfuegbar">–</b></div>
+      <div class="kachel k-rosa"><span>Ausgeliehene Ski</span><b id="k-ausgeliehen">–</b></div>
+      <div class="kachel k-blau"><span>Gesamt Ski</span><b id="k-gesamt">–</b></div>
+      <div class="kachel k-gruen"><span>Registrierte Personen</span><b id="k-personen">–</b></div>
+    </div>
+    <div class="mini-kacheln">
+      <div class="mini warn"><b id="k-ueberfaellig">–</b><span>überfällig</span></div>
+      <div class="mini"><b id="k-heute">–</b><span>heute zurück</span></div>
+      <div class="mini"><b id="k-reserv">–</b><span>Reservierungen</span></div>
+      <div class="mini"><b id="k-umsatz">–</b><span>Umsatz abgeschlossen</span></div>
+    </div>
+
+    <h2>Schnellzugriff</h2>
+    <div class="knopfreihe">
+      <a class="knopf" href="#ski">Ski verwalten</a>
+      <a class="knopf" href="#personen">Personen verwalten</a>
+      <button class="knopf gruen" onclick="ausleiheDialog()">＋ Neue Ausleihe</button>
+    </div>
+
+    <h2>Offene Ausleihen &amp; Reservierungen</h2>
+    <div class="tabelle-wrap"><table>
+      <thead><tr><th>Status</th><th>Ski</th><th>Person</th><th>Beginn</th><th>Ende</th><th class="rechts">Preis</th><th></th></tr></thead>
+      <tbody id="dash-offen"></tbody>
+    </table></div>
+  </section>
+
+  <!-- Ski (A-1 … A-3) -->
+  <section data-page="ski" class="karte" hidden>
+    <div class="titelzeile">
+      <h1>Ski-Verwaltung</h1>
+      <button class="knopf" onclick="skiDialog()">＋ Ski anlegen</button>
+    </div>
+    <div class="filter">
+      <input type="search" id="ski-suche" placeholder="Suchen: Nummer, Marke, Modell …">
+      <select id="ski-kat"><option value="">Alle Kategorien</option></select>
+      <select id="ski-status">
+        <option value="">Alle Status</option>
+        <option>verfügbar</option><option>ausgeliehen</option><option>reserviert</option>
+      </select>
+    </div>
+    <div class="tabelle-wrap"><table>
+      <thead><tr><th>Nr.</th><th>Marke / Modell</th><th>Länge</th><th>Kategorie</th><th>Status</th><th></th></tr></thead>
+      <tbody id="ski-liste"></tbody>
+    </table></div>
+  </section>
+
+  <!-- Personen (A-4 … A-7) -->
+  <section data-page="personen" class="karte" hidden>
+    <div class="titelzeile">
+      <h1>Personen</h1>
+      <button class="knopf" onclick="personDialog()">＋ Person anlegen</button>
+    </div>
+    <div class="filter">
+      <input type="search" id="person-suche" placeholder="Suchen: Name, E-Mail, Ausweisnummer …">
+    </div>
+    <div class="tabelle-wrap"><table>
+      <thead><tr><th>Name</th><th>Kontakt</th><th>Ausweis</th><th>Offen</th><th></th></tr></thead>
+      <tbody id="person-liste"></tbody>
+    </table></div>
+  </section>
+
+  <!-- Ausleihen (A-8 … A-10, B-7) -->
+  <section data-page="ausleihen" class="karte" hidden>
+    <div class="titelzeile">
+      <h1>Ausleihen &amp; Reservierungen</h1>
+      <button class="knopf gruen" onclick="ausleiheDialog()">＋ Neue Ausleihe</button>
+    </div>
+    <div class="filter">
+      <input type="search" id="aus-suche" placeholder="Suchen: Ski oder Person …">
+      <select id="aus-status">
+        <option value="offen">Nur offene</option>
+        <option value="">Alle</option>
+        <option>reserviert</option><option>aktiv</option><option>überfällig</option>
+        <option>zurückgegeben</option><option>storniert</option>
+      </select>
+    </div>
+    <div class="tabelle-wrap"><table>
+      <thead><tr><th>Status</th><th>Ski</th><th>Person</th><th>Beginn</th><th>Ende / Rückgabe</th><th class="rechts">Preis</th><th></th></tr></thead>
+      <tbody id="aus-liste"></tbody>
+    </table></div>
+  </section>
+
+  <!-- Preise (B-3 … B-5) -->
+  <section data-page="preise" class="karte" hidden>
+    <h1>Preise</h1>
+    <p class="hinweis">Abgerechnet wird <b>jede angefangene Stunde</b>. Pro 24 Stunden wird höchstens der Tagespreis verrechnet.
+      Änderungen gelten nur für neue Buchungen.</p>
+    <div class="tabelle-wrap"><table>
+      <thead><tr><th>Kategorie</th><th>Preis / Stunde (€)</th><th>Höchstpreis / Tag (€)</th><th>Beispiel 3 h</th><th>Beispiel 2 Tage</th><th></th></tr></thead>
+      <tbody id="preis-liste"></tbody>
+    </table></div>
+  </section>
+</main>
+
+<!-- Dialog: Ski -->
+<dialog id="dlg-ski">
+  <form method="dialog" onsubmit="return false">
+    <h2 id="ski-titel">Ski</h2>
+    <div class="raster">
+      <label>Inventarnummer *<input name="nummer" required placeholder="z. B. S-021"></label>
+      <label>Kategorie *<select name="kategorie" required></select></label>
+      <label>Marke *<input name="marke" required></label>
+      <label>Modell<input name="modell"></label>
+      <label>Länge (cm) *<input name="laengeCm" type="number" min="70" max="220" required></label>
+      <label class="breit">Notiz<input name="notiz" placeholder="z. B. Kante leicht beschädigt"></label>
+    </div>
+    <p class="fehler" hidden></p>
+    <div class="knopfreihe rechts">
+      <button type="button" class="knopf grau" onclick="this.closest('dialog').close()">Abbrechen</button>
+      <button type="submit" class="knopf" onclick="skiSpeichern()">Speichern</button>
+    </div>
+  </form>
+</dialog>
+
+<!-- Dialog: Person mit Ausweis (A-5, A-6) -->
+<dialog id="dlg-person">
+  <form method="dialog" onsubmit="return false">
+    <h2 id="person-titel">Person</h2>
+    <div class="raster">
+      <label>Vorname *<input name="vorname" required autocomplete="off"></label>
+      <label>Nachname *<input name="nachname" required autocomplete="off"></label>
+      <label>E-Mail<input name="email" type="email" autocomplete="off"></label>
+      <label>Telefon<input name="telefon" type="tel" autocomplete="off"></label>
+    </div>
+    <fieldset>
+      <legend>Ausweis</legend>
+      <div class="raster">
+        <label>Ausweistyp *<select name="ausweisTyp" required></select></label>
+        <label>Ausweisnummer *<input name="ausweisNummer" required autocomplete="off" placeholder="z. B. AT1234567"></label>
+      </div>
+      <label class="ablage" id="ablage">
+        <input type="file" name="datei" accept="image/jpeg,image/png,image/webp,application/pdf" hidden>
+        <span class="ablage-text">📎 Ausweis-Foto oder PDF hierher ziehen oder <u>auswählen</u><br><small>JPG, PNG, WebP oder PDF · max. 5 MB · optional</small></span>
+        <img class="vorschau" alt="" hidden>
+      </label>
+      <div class="datei-info" hidden>
+        <span></span>
+        <a target="_blank" rel="noopener">ansehen</a>
+        <button type="button" class="link rot" onclick="ausweisEntfernen()">entfernen</button>
+      </div>
+    </fieldset>
+    <p class="fehler" hidden></p>
+    <div class="knopfreihe rechts">
+      <button type="button" class="knopf grau" onclick="this.closest('dialog').close()">Abbrechen</button>
+      <button type="submit" class="knopf" onclick="personSpeichern()">Speichern</button>
+    </div>
+  </form>
+</dialog>
+
+<!-- Dialog: Neue Ausleihe (A-8, A-17, A-18, B-1, B-2) -->
+<dialog id="dlg-ausleihe" class="gross">
+  <form method="dialog" onsubmit="return false">
+    <h2>Neue Ausleihe</h2>
+
+    <div class="schritt"><span>1</span> Person</div>
+    <div class="zeile">
+      <select name="personId" required></select>
+      <button type="button" class="knopf grau" onclick="personDialog(null, true)">＋ Neue Person</button>
+    </div>
+
+    <div class="schritt"><span>2</span> Zeitraum</div>
+    <div class="raster">
+      <label>Beginn *<input name="beginn" type="datetime-local" required></label>
+      <label>Ende *<input name="ende" type="datetime-local" required></label>
+    </div>
+    <div class="chips" id="dauer-chips">
+      <button type="button" data-h="2">2 Std.</button>
+      <button type="button" data-h="4">4 Std.</button>
+      <button type="button" data-h="8">Ganzer Tag (8 Std.)</button>
+      <button type="button" data-h="24">24 Std.</button>
+      <button type="button" data-h="72">3 Tage</button>
+      <button type="button" data-h="168">1 Woche</button>
+    </div>
+    <p class="hinweis" id="dauer-text"></p>
+
+    <div class="schritt"><span>3</span> Ski auswählen</div>
+    <div class="filter">
+      <select id="aw-kat"><option value="">Alle Kategorien</option></select>
+      <input type="number" id="aw-laenge" placeholder="Wunschlänge cm" min="70" max="220">
+    </div>
+    <div class="ski-auswahl" id="ski-auswahl"></div>
+
+    <p class="fehler" hidden></p>
+    <div class="knopfreihe rechts summe-zeile">
+      <span id="summe"></span>
+      <button type="button" class="knopf grau" onclick="this.closest('dialog').close()">Abbrechen</button>
+      <button type="submit" class="knopf gruen" id="buchen" disabled onclick="ausleiheSpeichern()">Buchen</button>
+    </div>
+  </form>
+</dialog>
+
+<!-- Dialog: Bestätigen (A-16) -->
+<dialog id="dlg-frage">
+  <form method="dialog">
+    <h2>Bist du sicher?</h2>
+    <p id="frage-text"></p>
+    <div class="knopfreihe rechts">
+      <button value="nein" class="knopf grau">Abbrechen</button>
+      <button value="ja" class="knopf rot">Ja</button>
+    </div>
+  </form>
+</dialog>
+
+<div id="toasts"></div>
+<script src="app.js"></script>
+</body>
+</html>
