@@ -19,13 +19,3 @@ PLUGINS=fahrrad,ski go run .     # Fahrräder + Ski gemeinsam
 ```
 
 Tests: `go test ./...` im jeweiligen Ordner.
-
-## Aufgabe 2 – Composite Pattern
-
-| Ordner | Inhalt |
-|--------|--------|
-| [`composite/`](composite) | Fenster aus `Glass`, `Frame` und verschachtelten `Window`s (Composite Pattern in Go). Prompt in [`composite/PROMPT.md`](composite/PROMPT.md). |
-
-```bash
-cd composite && go run .
-```
